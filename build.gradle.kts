@@ -20,22 +20,32 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// Task to build the Client JAR
 tasks.register<Jar>("clientJar") {
     archiveFileName.set("client.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(sourceSets.main.get().output) // Includes all compiled classes
     manifest {
-        attributes["Main-Class"] = "client.Client" // Ensure this matches your main client class
+        attributes["Main-Class"] = "client.Client" // Ensure correct main class
     }
+    from(sourceSets.main.get().output)
+
+    // Include dependencies inside the JAR (fat JAR)
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.exists() }.map { if (it.isDirectory) it else zipTree(it) }
+    })
 }
 
-// Task to build the Server JAR
 tasks.register<Jar>("serverJar") {
     archiveFileName.set("server.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(sourceSets.main.get().output) // Includes all compiled classes
     manifest {
-        attributes["Main-Class"] = "server.Server" // Ensure this matches your main server class
+        attributes["Main-Class"] = "server.Server" // Ensure correct main class
     }
+    from(sourceSets.main.get().output)
+
+    // Include dependencies inside the JAR (fat JAR)
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.exists() }.map { if (it.isDirectory) it else zipTree(it) }
+    })
 }
