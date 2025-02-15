@@ -14,6 +14,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.net.Socket;
 
+/**
+ * AuthService handles user authentication, user data management, and session tracking.
+ */
 public class AuthService {
     private Map<String, String> users = new HashMap<>();
     private Map<Socket, String> authenticatedUsers = new HashMap<>();
@@ -21,11 +24,20 @@ public class AuthService {
     private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final String USER_DATA_PATH = Utils.USER_DATA_PATH;
 
+    /**
+     * Constructor that loads existing users from the data file.
+     */
     public AuthService() {
         loadUsers();
         System.out.println(GSON.toJson(users));
     }
 
+    /**
+     * Authenticates a client by prompting for username and password.
+     *
+     * @param clientSocket The socket representing the client connection.
+     * @return true if authentication is successful, false otherwise.
+     */
     public boolean authenticate(Socket clientSocket) {
         try {
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
@@ -56,10 +68,23 @@ public class AuthService {
         return false;
     }
 
+    /**
+     * Retrieves the username associated with a given client socket.
+     *
+     * @param clientSocket The client socket.
+     * @return The username of the authenticated client.
+     */
     public String getUsername(Socket clientSocket) {
         return authenticatedUsers.get(clientSocket);
     }
 
+    /**
+     * Checks if a username-password combination is valid or creates a new user.
+     *
+     * @param username The provided username.
+     * @param password The provided password.
+     * @return true if the user is valid or newly created, false otherwise.
+     */
     private boolean isValidUser(String username, String password) {
         if (!users.containsKey(username)) {
             users.put(username, password);
@@ -73,6 +98,9 @@ public class AuthService {
         }
     }
 
+    /**
+     * Loads user data from the JSON file.
+     */
     private void loadUsers() {
         File file = new File(USER_DATA_PATH);
         if (!file.exists()) {
@@ -91,6 +119,9 @@ public class AuthService {
         }
     }
 
+    /**
+     * Saves user data to the JSON file.
+     */
     private void saveUsers() {
         try {
             File file = new File(USER_DATA_PATH);

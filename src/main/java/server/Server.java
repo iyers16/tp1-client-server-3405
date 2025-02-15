@@ -4,21 +4,62 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.Scanner;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
+import static server.Utils.*;
+
+/**
+ * Server class that initializes and runs the chat server.
+ * It sets up the server socket, manages core services such as authentication,
+ * messaging, and history, and handles client connections.
+ *
+ * Responsibilities:
+ * - Bind to a specified IP address and port.
+ * - Initialize authentication, message, and history services.
+ * - Accept and handle multiple client connections concurrently.
+ */
 public class Server {
 	private static ServerSocket Listener;
 	private static AuthService authService;
 	private static MessageService messageService;
 	private static HistoryService historyService;
 
+	/**
+	 * Main method that starts the server.
+	 * @param args Command-line arguments.
+	 * @throws Exception if an unexpected error occurs during server operation.
+	 */
 	public static void main(String[] args) throws Exception {
 
 		try (Scanner scanner = new Scanner(System.in)) {
-			// System.out.print("Entrez l'adresse IP du serveur (ex: 127.0.0.1) : ");
 
-			// TODO: change so that it accepts user inputs for server address and port (hardcoded for now)
-			String serverAddress = "127.0.0.1";
-			int serverPort = 5000;
+			String serverAddress;
+			while (true) {
+				System.out.print("Enter the server's IPv4 address (e.g., 127.0.0.1): ");
+				serverAddress = scanner.nextLine().trim();
+				if (Pattern.matches(IPV4_REGEX, serverAddress)) {
+					break;
+				} else {
+					System.out.println("Invalid IPv4 address. Please try again.");
+				}
+			}
+
+
+			int serverPort;
+			while (true) {
+				System.out.print("Enter server port (" + PORT_MIN + " - " + PORT_MAX + "): ");
+				String portInput = scanner.nextLine().trim();
+				try {
+					serverPort = Integer.parseInt(portInput);
+					if (serverPort >= PORT_MIN && serverPort <= PORT_MAX) {
+						break;
+					} else {
+						System.out.println("Port number must be between " + PORT_MIN + " and " + PORT_MAX + ". Please try again.");
+					}
+				} catch (NumberFormatException e) {
+					System.out.println("Invalid port number. Please enter a valid integer.");
+				}
+			}
 
 			try {
 				Listener = new ServerSocket();
